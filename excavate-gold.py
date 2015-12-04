@@ -50,6 +50,13 @@ def get_username_and_user_id():
     return (username, user_id)
 
 
+def store_gold_units(user_id, bucket_id):
+    store_result = False
+    while not store_result:
+        response = retry_request('post', url + store % (user_id, bucket_id))
+        store_result = response.json()
+
+
 def print_gold_status(user_id):
     success = False
     while not success:
@@ -59,14 +66,12 @@ def print_gold_status(user_id):
             print "Current gold units excavated: %d" % gold_units
             success = True
         except:
-            success = False
+            pass
 
 
 if __name__ == "__main__":
     (username, user_id) = get_username_and_user_id()
-    print "Our username: %s" % username
-    print "We have a user id!: %s" % user_id
-
+    print "%s has the userId: %s" % (username, user_id)
     total_gold_units = 0
     # This should be a while True ^_^
     while total_gold_units < 1000:
@@ -74,11 +79,5 @@ if __name__ == "__main__":
         (bucket_id, gold_units) = process_excavate_respose(response)
         if bucket_id and gold_units:
             total_gold_units += gold_units
-
-            store_result = False
-            while not store_result:
-                response = retry_request('post',
-                                         url + store % (user_id, bucket_id))
-                store_result = response.json()
-
+            store_gold_units(user_id, bucket_id)
             print_gold_status(user_id)
